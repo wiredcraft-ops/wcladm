@@ -20,11 +20,11 @@ var (
 		#It can be set to https if ssl is enabled on nginx.
 		ui_url_protocol = {{ .Scheme }}
 
-		#Maximum number of job workers in job service  
-		max_job_workers = 50 
+		#Maximum number of job workers in job service
+		max_job_workers = 50
 
 		#Determine whether or not to generate certificate for the registry's token.
-		#If the value is on, the prepare script creates new root cert and private key 
+		#If the value is on, the prepare script creates new root cert and private key
 		#for generating token to access the registry. If the value is off the default key/cert will be used.
 		#This flag also controls the creation of the notary signer's cert.
 		customize_crt = on
@@ -41,8 +41,8 @@ var (
 
 		#Log files are rotated log_rotate_count times before being removed. If count is 0, old versions are removed rather than rotated.
 		log_rotate_count = 50
-		#Log files are rotated only if they grow bigger than log_rotate_size bytes. If size is followed by k, the size is assumed to be in kilobytes. 
-		#If the M is used, the size is in megabytes, and if G is used, the size is in gigabytes. So size 100, size 100k, size 100M and size 100G 
+		#Log files are rotated only if they grow bigger than log_rotate_size bytes. If size is followed by k, the size is assumed to be in kilobytes.
+		#If the M is used, the size is in megabytes, and if G is used, the size is in gigabytes. So size 100, size 100k, size 100M and size 100G
 		#are all valid.
 		log_rotate_size = 200M
 
@@ -53,7 +53,7 @@ var (
 		no_proxy = 127.0.0.1,localhost,ui
 
 		#NOTES: The properties between BEGIN INITIAL PROPERTIES and END INITIAL PROPERTIES
-		#only take effect in the first boot, the subsequent changes of these properties 
+		#only take effect in the first boot, the subsequent changes of these properties
 		#should be performed on web ui
 
 		#************************BEGIN INITIAL PROPERTIES************************
@@ -62,7 +62,7 @@ var (
 
 		#Email server uses the given username and password to authenticate on TLS connections to host and act as identity.
 		#Identity left blank to act as username.
-		email_identity = 
+		email_identity =
 
 		email_server = smtp.mydomain.com
 		email_server_port = 25
@@ -72,7 +72,7 @@ var (
 		email_ssl = false
 		email_insecure = false
 
-		##The initial password of Harbor admin, only works for the first time when Harbor starts. 
+		##The initial password of Harbor admin, only works for the first time when Harbor starts.
 		#It has no effect after the first launch of Harbor.
 		#Change the admin password from UI after launching Harbor.
 		harbor_admin_password = {{ .AdminPassword }}
@@ -84,7 +84,7 @@ var (
 		#The url for an ldap endpoint.
 		ldap_url = ldaps://ldap.mydomain.com
 
-		#A user's DN who has the permission to search the LDAP/AD server. 
+		#A user's DN who has the permission to search the LDAP/AD server.
 		#If your LDAP/AD server does not support anonymous search, you should configure this DN and ldap_search_pwd.
 		#ldap_searchdn = uid=searchuser,ou=people,dc=mydomain,dc=com
 
@@ -97,11 +97,11 @@ var (
 		#Search filter for LDAP/AD, make sure the syntax of the filter is correct.
 		#ldap_filter = (objectClass=person)
 
-		# The attribute used in a search to match a user, it could be uid, cn, email, sAMAccountName or other attributes depending on your LDAP/AD  
-		ldap_uid = uid 
+		# The attribute used in a search to match a user, it could be uid, cn, email, sAMAccountName or other attributes depending on your LDAP/AD
+		ldap_uid = uid
 
 		#the scope to search for users, 0-LDAP_SCOPE_BASE, 1-LDAP_SCOPE_ONELEVEL, 2-LDAP_SCOPE_SUBTREE
-		ldap_scope = 2 
+		ldap_scope = 2
 
 		#Timeout (in seconds)  when connecting to an LDAP Server. The default value (and most reasonable) is 5 seconds.
 		ldap_timeout = 5
@@ -128,7 +128,7 @@ var (
 		token_expiration = 30
 
 		#The flag to control what users have permission to create projects
-		#The default value "everyone" allows everyone to creates a project. 
+		#The default value "everyone" allows everyone to creates a project.
 		#Set to "adminonly" so that only admin user can create project.
 		project_creation_restriction = everyone
 
@@ -194,7 +194,7 @@ var (
 	HarborPrepareTempl = template.Must(template.New("harbor").Parse(dedent.Dedent(`
 		#!/usr/bin/python
 		# -*- coding: utf-8 -*-
-		from __future__ import print_function, unicode_literals # We require Python 2.6 or later
+		from __future__ import print_function, unicode_literals  # We require Python 2.6 or later
 		from string import Template
 		import random
 		import string
@@ -213,31 +213,42 @@ var (
 			import configparser as ConfigParser
 			import io as StringIO
 
-		def validate(conf, args): 
+
+		def validate(conf, args):
 			if args.ha_mode:
 				db_host = rcp.get("configuration", "db_host")
 				if db_host == "mysql":
-					raise Exception("Error: In HA mode, db_host in harbor.cfg needs to point to an external DB address.")
-				registry_storage_provider_name = rcp.get("configuration",
-														"registry_storage_provider_name").strip()
+					raise Exception(
+						"Error: In HA mode, db_host in harbor.cfg needs to point to an external DB address."
+					)
+				registry_storage_provider_name = rcp.get(
+					"configuration", "registry_storage_provider_name").strip()
 				if registry_storage_provider_name == "filesystem" and not args.yes:
 					msg = 'Is the Harbor Docker Registry configured to use shared storage (e.g. NFS, Ceph etc.)? [yes/no]:'
 					if raw_input(msg).lower() != "yes":
-						raise Exception("Error: In HA mode, shared storage configuration for Docker Registry in harbor.cfg is required. Refer to HA installation guide for details.")
+						raise Exception(
+							"Error: In HA mode, shared storage configuration for Docker Registry in harbor.cfg is required. Refer to HA installation guide for details."
+						)
 				redis_url = rcp.get("configuration", "redis_url")
 				if redis_url is None or len(redis_url) < 1:
-					raise Exception("Error: In HA mode, redis_url in harbor.cfg needs to point to a Redis cluster.")
+					raise Exception(
+						"Error: In HA mode, redis_url in harbor.cfg needs to point to a Redis cluster."
+					)
 				if args.notary_mode:
 					raise Exception("Error: HA mode doesn't support Notary currently")
 				if args.clair_mode:
 					clair_db_host = rcp.get("configuration", "clair_db_host")
 					if "postgres" == clair_db_host:
-						raise Exception("Error: In HA mode, clair_db_host in harbor.cfg needs to point to an external Postgres DB address.")
+						raise Exception(
+							"Error: In HA mode, clair_db_host in harbor.cfg needs to point to an external Postgres DB address."
+						)
 
 				cert_path = rcp.get("configuration", "ssl_cert")
 				cert_key_path = rcp.get("configuration", "ssl_cert_key")
-				shared_cert_key = os.path.join(base_dir, "ha", os.path.basename(cert_key_path))
-				shared_cert_path = os.path.join(base_dir, "ha", os.path.basename(cert_path))
+				shared_cert_key = os.path.join(base_dir, "ha",
+											   os.path.basename(cert_key_path))
+				shared_cert_path = os.path.join(base_dir, "ha",
+												os.path.basename(cert_path))
 				if os.path.isfile(shared_cert_key):
 					shutil.copy2(shared_cert_key, cert_key_path)
 				if os.path.isfile(shared_cert_path):
@@ -245,22 +256,33 @@ var (
 
 			protocol = rcp.get("configuration", "ui_url_protocol")
 			if protocol != "https" and args.notary_mode:
-				raise Exception("Error: the protocol must be https when Harbor is deployed with Notary")
+				raise Exception(
+					"Error: the protocol must be https when Harbor is deployed with Notary"
+				)
 			if protocol == "https":
 				if not rcp.has_option("configuration", "ssl_cert"):
-					raise Exception("Error: The protocol is https but attribute ssl_cert is not set")
+					raise Exception(
+						"Error: The protocol is https but attribute ssl_cert is not set"
+					)
 				cert_path = rcp.get("configuration", "ssl_cert")
 				if not os.path.isfile(cert_path):
-					raise Exception("Error: The path for certificate: %s is invalid" % cert_path)
+					raise Exception(
+						"Error: The path for certificate: %s is invalid" % cert_path)
 				if not rcp.has_option("configuration", "ssl_cert_key"):
-					raise Exception("Error: The protocol is https but attribute ssl_cert_key is not set")
+					raise Exception(
+						"Error: The protocol is https but attribute ssl_cert_key is not set"
+					)
 				cert_key_path = rcp.get("configuration", "ssl_cert_key")
 				if not os.path.isfile(cert_key_path):
-					raise Exception("Error: The path for certificate key: %s is invalid" % cert_key_path)
+					raise Exception(
+						"Error: The path for certificate key: %s is invalid" %
+						cert_key_path)
 			project_creation = rcp.get("configuration", "project_creation_restriction")
 
 			if project_creation != "everyone" and project_creation != "adminonly":
-				raise Exception("Error invalid value for project_creation_restriction: %s" % project_creation)
+				raise Exception(
+					"Error invalid value for project_creation_restriction: %s" %
+					project_creation)
 
 		def prepare_ha(conf, args):
 			#files under ha folder will have high prority
@@ -269,11 +291,13 @@ var (
 				#copy nginx certificate
 				cert_path = rcp.get("configuration", "ssl_cert")
 				cert_key_path = rcp.get("configuration", "ssl_cert_key")
-				shared_cert_key = os.path.join(base_dir, "ha", os.path.basename(cert_key_path))
-				shared_cert_path = os.path.join(base_dir, "ha", os.path.basename(cert_path))
+				shared_cert_key = os.path.join(base_dir, "ha",
+											   os.path.basename(cert_key_path))
+				shared_cert_path = os.path.join(base_dir, "ha",
+												os.path.basename(cert_path))
 				if os.path.isfile(shared_cert_key):
 					shutil.copy2(shared_cert_key, cert_key_path)
-				else: 
+				else:
 					if os.path.isfile(cert_key_path):
 						shutil.copy2(cert_key_path, shared_cert_key)
 				if os.path.isfile(shared_cert_path):
@@ -283,7 +307,8 @@ var (
 						shutil.copy2(cert_path, shared_cert_path)
 				#check if ca exsit
 				cert_ca_path = "/data/ca_download/ca.crt"
-				shared_ca_path = os.path.join(base_dir, "ha", os.path.basename(cert_ca_path))
+				shared_ca_path = os.path.join(base_dir, "ha",
+											  os.path.basename(cert_ca_path))
 				if os.path.isfile(shared_ca_path):
 					shutil.copy2(shared_ca_path, cert_ca_path)
 				else:
@@ -306,7 +331,7 @@ var (
 					shutil.copy2(root_crt, shared_root_crt)
 			#secretkey
 			shared_secret_key = os.path.join(base_dir, "ha", "secretkey")
-			secretkey_path = rcp.get("configuration", "secretkey_path") 
+			secretkey_path = rcp.get("configuration", "secretkey_path")
 			secret_key = os.path.join(secretkey_path, "secretkey")
 			if os.path.isfile(shared_secret_key):
 				shutil.copy2(shared_secret_key, secret_key)
@@ -315,14 +340,18 @@ var (
 					shutil.copy2(secret_key, shared_secret_key)
 
 		def get_secret_key(path):
-			secret_key = _get_secret(path, "secretkey") 
+			secret_key = _get_secret(path, "secretkey")
 			if len(secret_key) != 16:
-				raise Exception("secret key's length has to be 16 chars, current length: %d" % len(secret_key))
+				raise Exception(
+					"secret key's length has to be 16 chars, current length: %d" %
+					len(secret_key))
 			return secret_key
+
 
 		def get_alias(path):
 			alias = _get_secret(path, "defaultalias", length=8)
 			return alias
+
 
 		def _get_secret(folder, filename, length=16):
 			key_file = os.path.join(folder, filename)
@@ -333,12 +362,15 @@ var (
 				return key
 			if not os.path.isdir(folder):
 				os.makedirs(folder, mode=0o600)
-			key = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(length))  
+			key = ''.join(
+				random.choice(string.ascii_letters + string.digits)
+				for i in range(length))
 			with open(key_file, 'w') as f:
 				f.write(key)
 				print("Generated and saved secret to file: %s" % key_file)
 			os.chmod(key_file, 0o600)
 			return key
+
 
 		def prep_conf_dir(root, name):
 			absolute_path = os.path.join(root, name)
@@ -346,15 +378,19 @@ var (
 				os.makedirs(absolute_path)
 			return absolute_path
 
+
 		def render(src, dest, **kw):
 			t = Template(open(src, 'r').read())
 			with open(dest, 'w') as f:
 				f.write(t.substitute(**kw))
 			print("Generated configuration file: %s" % dest)
 
+
 		base_dir = os.path.dirname(__file__)
 		config_dir = os.path.join(base_dir, "common/config")
 		templates_dir = os.path.join(base_dir, "common/templates")
+
+
 		def delfile(src):
 			if os.path.isfile(src):
 				try:
@@ -364,15 +400,41 @@ var (
 					pass
 			elif os.path.isdir(src):
 				for item in os.listdir(src):
-					itemsrc=os.path.join(src,item)
+					itemsrc = os.path.join(src, item)
 					delfile(itemsrc)
 
+
 		parser = argparse.ArgumentParser()
-		parser.add_argument('--conf', dest='cfgfile', default=base_dir+'/harbor.cfg',type=str,help="the path of Harbor configuration file")
-		parser.add_argument('--with-notary', dest='notary_mode', default=False, action='store_true', help="the Harbor instance is to be deployed with notary")
-		parser.add_argument('--with-clair', dest='clair_mode', default=False, action='store_true', help="the Harbor instance is to be deployed with clair")
-		parser.add_argument('--ha', dest='ha_mode', default=False, action='store_true', help="the Harbor instance is to be deployed in HA mode")
-		parser.add_argument('--yes', dest='yes', default=False, action='store_true', help="Answer yes to all questions")
+		parser.add_argument(
+			'--conf',
+			dest='cfgfile',
+			default=base_dir + '/harbor.cfg',
+			type=str,
+			help="the path of Harbor configuration file")
+		parser.add_argument(
+			'--with-notary',
+			dest='notary_mode',
+			default=False,
+			action='store_true',
+			help="the Harbor instance is to be deployed with notary")
+		parser.add_argument(
+			'--with-clair',
+			dest='clair_mode',
+			default=False,
+			action='store_true',
+			help="the Harbor instance is to be deployed with clair")
+		parser.add_argument(
+			'--ha',
+			dest='ha_mode',
+			default=False,
+			action='store_true',
+			help="the Harbor instance is to be deployed in HA mode")
+		parser.add_argument(
+			'--yes',
+			dest='yes',
+			default=False,
+			action='store_true',
+			help="Answer yes to all questions")
 		args = parser.parse_args()
 
 		delfile(config_dir)
@@ -460,25 +522,29 @@ var (
 		else:
 			redis_url = ""
 
-		storage_provider_name = rcp.get("configuration", "registry_storage_provider_name").strip()
-		storage_provider_config = rcp.get("configuration", "registry_storage_provider_config").strip()
+		storage_provider_name = rcp.get("configuration",
+										"registry_storage_provider_name").strip()
+		storage_provider_config = rcp.get("configuration",
+										  "registry_storage_provider_config").strip()
 		# yaml requires 1 or more spaces between the key and value
 		storage_provider_config = storage_provider_config.replace(":", ": ", 1)
-		ui_secret = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(16))  
-		jobservice_secret = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(16))  
+		ui_secret = ''.join(
+			random.choice(string.ascii_letters + string.digits) for i in range(16))
+		jobservice_secret = ''.join(
+			random.choice(string.ascii_letters + string.digits) for i in range(16))
 
-		adminserver_config_dir = os.path.join(config_dir,"adminserver")
+		adminserver_config_dir = os.path.join(config_dir, "adminserver")
 		if not os.path.exists(adminserver_config_dir):
 			os.makedirs(os.path.join(config_dir, "adminserver"))
 
-		ui_config_dir = prep_conf_dir(config_dir,"ui")
-		ui_certificates_dir =  prep_conf_dir(ui_config_dir,"certificates")
+		ui_config_dir = prep_conf_dir(config_dir, "ui")
+		ui_certificates_dir = prep_conf_dir(ui_config_dir, "certificates")
 		db_config_dir = prep_conf_dir(config_dir, "db")
 		job_config_dir = prep_conf_dir(config_dir, "jobservice")
 		registry_config_dir = prep_conf_dir(config_dir, "registry")
-		nginx_config_dir = prep_conf_dir (config_dir, "nginx")
+		nginx_config_dir = prep_conf_dir(config_dir, "nginx")
 		nginx_conf_d = prep_conf_dir(nginx_config_dir, "conf.d")
-		log_config_dir = prep_conf_dir (config_dir, "log")
+		log_config_dir = prep_conf_dir(config_dir, "log")
 
 		adminserver_conf_env = os.path.join(config_dir, "adminserver", "env")
 		ui_conf_env = os.path.join(config_dir, "ui", "env")
@@ -490,7 +556,7 @@ var (
 		job_conf_env = os.path.join(config_dir, "jobservice", "env")
 		nginx_conf = os.path.join(config_dir, "nginx", "nginx.conf")
 		cert_dir = os.path.join(config_dir, "nginx", "cert")
-		log_rotate_config = os.path.join(config_dir, "log", "logrotate.conf") 
+		log_rotate_config = os.path.join(config_dir, "log", "logrotate.conf")
 		adminserver_url = "http://adminserver:8080"
 		registry_url = "http://registry:5000"
 		ui_url = "http://ui:8080"
@@ -504,82 +570,85 @@ var (
 			target_cert_path = os.path.join(cert_dir, os.path.basename(cert_path))
 			if not os.path.exists(cert_dir):
 				os.makedirs(cert_dir)
-			shutil.copy2(cert_path,target_cert_path)
-			target_cert_key_path = os.path.join(cert_dir, os.path.basename(cert_key_path))
-			shutil.copy2(cert_key_path,target_cert_key_path)
-			render(os.path.join(templates_dir, "nginx", "nginx.https.conf"),
-					nginx_conf,
-					ssl_cert = os.path.join("/etc/nginx/cert", os.path.basename(target_cert_path)),
-					ssl_cert_key = os.path.join("/etc/nginx/cert", os.path.basename(target_cert_key_path)))
+			shutil.copy2(cert_path, target_cert_path)
+			target_cert_key_path = os.path.join(cert_dir,
+												os.path.basename(cert_key_path))
+			shutil.copy2(cert_key_path, target_cert_key_path)
+			render(
+				os.path.join(templates_dir, "nginx", "nginx.https.conf"),
+				nginx_conf,
+				ssl_cert=os.path.join("/etc/nginx/cert",
+									  os.path.basename(target_cert_path)),
+				ssl_cert_key=os.path.join("/etc/nginx/cert",
+										  os.path.basename(target_cert_key_path)))
 		else:
-			render(os.path.join(templates_dir, "nginx", "nginx.http.conf"),
-				nginx_conf)
-				
-		render(os.path.join(templates_dir, "adminserver", "env"),
-				adminserver_conf_env,
-				reload_config=reload_config,
-				public_url=public_url,
-				ui_url=ui_url,
-				auth_mode=auth_mode,
-				self_registration=self_registration,
-				ldap_url=ldap_url,
-				ldap_searchdn =ldap_searchdn, 
-				ldap_search_pwd =ldap_search_pwd,
-				ldap_basedn=ldap_basedn,
-				ldap_filter=ldap_filter,
-				ldap_uid=ldap_uid,
-				ldap_scope=ldap_scope,
-				ldap_verify_cert=ldap_verify_cert,
-				ldap_timeout=ldap_timeout,
-				ldap_group_basedn=ldap_group_basedn,
-				ldap_group_filter=ldap_group_filter,
-				ldap_group_gid=ldap_group_gid,
-				ldap_group_scope=ldap_group_scope,
-				db_password=db_password,
-				db_host=db_host,
-				db_user=db_user,
-				db_port=db_port,
-				email_host=email_host,
-				email_port=email_port,
-				email_usr=email_usr,
-				email_pwd=email_pwd,
-				email_ssl=email_ssl,
-				email_insecure=email_insecure,
-				email_from=email_from,
-				email_identity=email_identity,
-				harbor_admin_password=harbor_admin_password,
-				project_creation_restriction=proj_cre_restriction,
-				max_job_workers=max_job_workers,
-				ui_secret=ui_secret,
-				jobservice_secret=jobservice_secret,
-				token_expiration=token_expiration,
-				admiral_url=admiral_url,
-				with_notary=args.notary_mode,
-				with_clair=args.clair_mode,
-				clair_db_password=clair_db_password,
-				clair_db_host=clair_db_host,
-				clair_db_port=clair_db_port,
-				clair_db_username=clair_db_username,
-				clair_db=clair_db,
-				uaa_endpoint=uaa_endpoint,
-				uaa_clientid=uaa_clientid,
-				uaa_clientsecret=uaa_clientsecret,
-				uaa_verify_cert=uaa_verify_cert,
-				storage_provider_name=storage_provider_name,
-				registry_url=registry_url,
-				token_service_url=token_service_url,
-				jobservice_url=jobservice_url,
-				clair_url=clair_url,
-				notary_url=notary_url
-			)
+			render(os.path.join(templates_dir, "nginx", "nginx.http.conf"), nginx_conf)
 
-		render(os.path.join(templates_dir, "ui", "env"), 
-				ui_conf_env, 
-				ui_secret=ui_secret,
-				jobservice_secret=jobservice_secret,
-				redis_url = redis_url,
-				adminserver_url = adminserver_url
-				)
+		render(
+			os.path.join(templates_dir, "adminserver", "env"),
+			adminserver_conf_env,
+			reload_config=reload_config,
+			public_url=public_url,
+			ui_url=ui_url,
+			auth_mode=auth_mode,
+			self_registration=self_registration,
+			ldap_url=ldap_url,
+			ldap_searchdn=ldap_searchdn,
+			ldap_search_pwd=ldap_search_pwd,
+			ldap_basedn=ldap_basedn,
+			ldap_filter=ldap_filter,
+			ldap_uid=ldap_uid,
+			ldap_scope=ldap_scope,
+			ldap_verify_cert=ldap_verify_cert,
+			ldap_timeout=ldap_timeout,
+			ldap_group_basedn=ldap_group_basedn,
+			ldap_group_filter=ldap_group_filter,
+			ldap_group_gid=ldap_group_gid,
+			ldap_group_scope=ldap_group_scope,
+			db_password=db_password,
+			db_host=db_host,
+			db_user=db_user,
+			db_port=db_port,
+			email_host=email_host,
+			email_port=email_port,
+			email_usr=email_usr,
+			email_pwd=email_pwd,
+			email_ssl=email_ssl,
+			email_insecure=email_insecure,
+			email_from=email_from,
+			email_identity=email_identity,
+			harbor_admin_password=harbor_admin_password,
+			project_creation_restriction=proj_cre_restriction,
+			max_job_workers=max_job_workers,
+			ui_secret=ui_secret,
+			jobservice_secret=jobservice_secret,
+			token_expiration=token_expiration,
+			admiral_url=admiral_url,
+			with_notary=args.notary_mode,
+			with_clair=args.clair_mode,
+			clair_db_password=clair_db_password,
+			clair_db_host=clair_db_host,
+			clair_db_port=clair_db_port,
+			clair_db_username=clair_db_username,
+			clair_db=clair_db,
+			uaa_endpoint=uaa_endpoint,
+			uaa_clientid=uaa_clientid,
+			uaa_clientsecret=uaa_clientsecret,
+			uaa_verify_cert=uaa_verify_cert,
+			storage_provider_name=storage_provider_name,
+			registry_url=registry_url,
+			token_service_url=token_service_url,
+			jobservice_url=jobservice_url,
+			clair_url=clair_url,
+			notary_url=notary_url)
+
+		render(
+			os.path.join(templates_dir, "ui", "env"),
+			ui_conf_env,
+			ui_secret=ui_secret,
+			jobservice_secret=jobservice_secret,
+			redis_url=redis_url,
+			adminserver_url=adminserver_url)
 
 		registry_config_file = "config_ha.yml" if args.ha_mode else "config.yml"
 		if storage_provider_name == "filesystem":
@@ -588,34 +657,40 @@ var (
 			elif "rootdirectory:" not in storage_provider_config:
 				storage_provider_config = "rootdirectory: /storage" + "," + storage_provider_config
 		# generate storage configuration section in yaml format
-		storage_provider_info = ('\n' + ' ' * 4).join(
-			[storage_provider_name + ':'] + map(string.strip, storage_provider_config.split(",")))
-		render(os.path.join(templates_dir, "registry", registry_config_file),
+		storage_provider_info = (
+			'\n' + ' ' * 4).join([storage_provider_name + ':'] +
+								 map(string.strip, storage_provider_config.split(",")))
+		render(
+			os.path.join(templates_dir, "registry", registry_config_file),
 			registry_conf,
 			storage_provider_info=storage_provider_info,
 			public_url=public_url,
 			ui_url=ui_url,
 			redis_url=redis_url)
 
-		render(os.path.join(templates_dir, "db", "env"),
-				db_conf_env,
-				db_password=db_password)
+		render(
+			os.path.join(templates_dir, "db", "env"),
+			db_conf_env,
+			db_password=db_password)
 
-		render(os.path.join(templates_dir, "jobservice", "env"),
-				job_conf_env,
-				ui_secret=ui_secret,
-				jobservice_secret=jobservice_secret,
-				adminserver_url=adminserver_url)
+		render(
+			os.path.join(templates_dir, "jobservice", "env"),
+			job_conf_env,
+			ui_secret=ui_secret,
+			jobservice_secret=jobservice_secret,
+			adminserver_url=adminserver_url)
 
-		render(os.path.join(templates_dir, "jobservice", "config.yml"),
-				jobservice_conf,
-				max_job_workers=max_job_workers,
-				redis_url=redis_url)
-				
-		render(os.path.join(templates_dir, "log", "logrotate.conf"),
-				log_rotate_config,
-				log_rotate_count=log_rotate_count,
-				log_rotate_size=log_rotate_size)
+		render(
+			os.path.join(templates_dir, "jobservice", "config.yml"),
+			jobservice_conf,
+			max_job_workers=max_job_workers,
+			redis_url=redis_url)
+
+		render(
+			os.path.join(templates_dir, "log", "logrotate.conf"),
+			log_rotate_config,
+			log_rotate_count=log_rotate_count,
+			log_rotate_size=log_rotate_size)
 
 		print("Generated configuration file: %s" % jobservice_conf)
 
@@ -635,52 +710,70 @@ var (
 
 		def validate_crt_subj(dirty_subj):
 			subj_list = [item for item in dirty_subj.strip().split("/") \
-				if len(item.split("=")) == 2 and len(item.split("=")[1]) > 0]
+			 if len(item.split("=")) == 2 and len(item.split("=")[1]) > 0]
 			return "/" + "/".join(subj_list)
+
 
 		FNULL = open(os.devnull, 'w')
 
 		from functools import wraps
+
+
 		def stat_decorator(func):
 			@wraps(func)
 			def check_wrapper(*args, **kw):
 				stat = func(*args, **kw)
 				message = "Generated certificate, key file: %s, cert file: %s" % (kw['key_path'], kw['cert_path']) \
-						if stat == 0 else "Fail to generate key file: %s, cert file: %s" % (kw['key_path'], kw['cert_path'])
+				  if stat == 0 else "Fail to generate key file: %s, cert file: %s" % (kw['key_path'], kw['cert_path'])
 				print(message)
 				if stat != 0:
 					sys.exit(1)
+
 			return check_wrapper
+
 
 		@stat_decorator
 		def create_root_cert(subj, key_path="./k.key", cert_path="./cert.crt"):
-		rc = subprocess.call(["openssl", "genrsa", "-out", key_path, "4096"], stdout=FNULL, stderr=subprocess.STDOUT)
-		if rc != 0:
+			rc = subprocess.call(
+				["openssl", "genrsa", "-out", key_path, "4096"],
+				stdout=FNULL,
+				stderr=subprocess.STDOUT)
+			if rc != 0:
 				return rc
-		return subprocess.call(["openssl", "req", "-new", "-x509", "-key", key_path,\
-				"-out", cert_path, "-days", "3650", "-subj", subj], stdout=FNULL, stderr=subprocess.STDOUT)
+			return subprocess.call(["openssl", "req", "-new", "-x509", "-key", key_path,\
+			  "-out", cert_path, "-days", "3650", "-subj", subj], stdout=FNULL, stderr=subprocess.STDOUT)
+
 
 		@stat_decorator
-		def create_cert(subj, ca_key, ca_cert, key_path="./k.key", cert_path="./cert.crt"):
+		def create_cert(subj,
+						ca_key,
+						ca_cert,
+						key_path="./k.key",
+						cert_path="./cert.crt"):
 			cert_dir = os.path.dirname(cert_path)
 			csr_path = os.path.join(cert_dir, "tmp.csr")
 			rc = subprocess.call(["openssl", "req", "-newkey", "rsa:4096", "-nodes","-sha256","-keyout", key_path,\
-				"-out", csr_path, "-subj", subj], stdout=FNULL, stderr=subprocess.STDOUT)
+			 "-out", csr_path, "-subj", subj], stdout=FNULL, stderr=subprocess.STDOUT)
 			if rc != 0:
 				return rc
 			return subprocess.call(["openssl", "x509", "-req", "-days", "3650", "-in", csr_path, "-CA", \
-				ca_cert, "-CAkey", ca_key, "-CAcreateserial", "-out", cert_path], stdout=FNULL, stderr=subprocess.STDOUT)
+			 ca_cert, "-CAkey", ca_key, "-CAcreateserial", "-out", cert_path], stdout=FNULL, stderr=subprocess.STDOUT)
+
 
 		def openssl_installed():
-			shell_stat = subprocess.check_call(["which", "openssl"], stdout=FNULL, stderr=subprocess.STDOUT)
+			shell_stat = subprocess.check_call(
+				["which", "openssl"], stdout=FNULL, stderr=subprocess.STDOUT)
 			if shell_stat != 0:
-				print("Cannot find openssl installed in this computer\nUse default SSL certificate file")
+				print(
+					"Cannot find openssl installed in this computer\nUse default SSL certificate file"
+				)
 				return False
 			return True
-				
+
 
 		if customize_crt == 'on' and openssl_installed():
-			shell_stat = subprocess.check_call(["which", "openssl"], stdout=FNULL, stderr=subprocess.STDOUT)
+			shell_stat = subprocess.check_call(
+				["which", "openssl"], stdout=FNULL, stderr=subprocess.STDOUT)
 			empty_subj = "/C=/ST=/L=/O=/CN=/"
 			private_key_pem = os.path.join(config_dir, "ui", "private_key.pem")
 			root_crt = os.path.join(config_dir, "registry", "root.crt")
@@ -689,17 +782,23 @@ var (
 			os.chmod(root_crt, 0o600)
 		else:
 			print("Copied configuration file: %s" % ui_config_dir + "private_key.pem")
-			shutil.copyfile(os.path.join(templates_dir, "ui", "private_key.pem"), os.path.join(ui_config_dir, "private_key.pem"))
+			shutil.copyfile(
+				os.path.join(templates_dir, "ui", "private_key.pem"),
+				os.path.join(ui_config_dir, "private_key.pem"))
 			print("Copied configuration file: %s" % registry_config_dir + "root.crt")
-			shutil.copyfile(os.path.join(templates_dir, "registry", "root.crt"), os.path.join(registry_config_dir, "root.crt"))
+			shutil.copyfile(
+				os.path.join(templates_dir, "registry", "root.crt"),
+				os.path.join(registry_config_dir, "root.crt"))
 
 		if args.notary_mode:
 			notary_config_dir = prep_conf_dir(config_dir, "notary")
-			notary_temp_dir = os.path.join(templates_dir, "notary") 
+			notary_temp_dir = os.path.join(templates_dir, "notary")
 			print("Copying sql file for notary DB")
 			if os.path.exists(os.path.join(notary_config_dir, "mysql-initdb.d")):
 				shutil.rmtree(os.path.join(notary_config_dir, "mysql-initdb.d"))
-			shutil.copytree(os.path.join(notary_temp_dir, "mysql-initdb.d"), os.path.join(notary_config_dir, "mysql-initdb.d")) 
+			shutil.copytree(
+				os.path.join(notary_temp_dir, "mysql-initdb.d"),
+				os.path.join(notary_config_dir, "mysql-initdb.d"))
 			if customize_crt == 'on' and openssl_installed():
 				try:
 					temp_cert_dir = os.path.join(base_dir, "cert_tmp")
@@ -707,12 +806,19 @@ var (
 						os.makedirs(temp_cert_dir)
 					ca_subj = "/C=US/ST=California/L=Palo Alto/O=VMware, Inc./OU=Harbor/CN=Self-signed by VMware, Inc."
 					cert_subj = "/C=US/ST=California/L=Palo Alto/O=VMware, Inc./OU=Harbor/CN=notarysigner"
-					signer_ca_cert = os.path.join(temp_cert_dir, "notary-signer-ca.crt")
+					signer_ca_cert = os.path.join(temp_cert_dir,
+												  "notary-signer-ca.crt")
 					signer_ca_key = os.path.join(temp_cert_dir, "notary-signer-ca.key")
 					signer_cert_path = os.path.join(temp_cert_dir, "notary-signer.crt")
 					signer_key_path = os.path.join(temp_cert_dir, "notary-signer.key")
-					create_root_cert(ca_subj, key_path=signer_ca_key, cert_path=signer_ca_cert)
-					create_cert(cert_subj, signer_ca_key, signer_ca_cert, key_path=signer_key_path, cert_path=signer_cert_path)
+					create_root_cert(
+						ca_subj, key_path=signer_ca_key, cert_path=signer_ca_cert)
+					create_cert(
+						cert_subj,
+						signer_ca_key,
+						signer_ca_cert,
+						key_path=signer_key_path,
+						cert_path=signer_cert_path)
 					print("Copying certs for notary signer")
 					os.chmod(signer_cert_path, 0o600)
 					os.chmod(signer_key_path, 0o600)
@@ -728,25 +834,42 @@ var (
 						shutil.rmtree(temp_cert_dir, True)
 			else:
 				print("Copying certs for notary signer")
-				shutil.copy2(os.path.join(notary_temp_dir, "notary-signer.crt"), notary_config_dir)
-				shutil.copy2(os.path.join(notary_temp_dir, "notary-signer.key"), notary_config_dir)
-				shutil.copy2(os.path.join(notary_temp_dir, "notary-signer-ca.crt"), notary_config_dir)
-			shutil.copy2(os.path.join(registry_config_dir, "root.crt"), notary_config_dir)
+				shutil.copy2(
+					os.path.join(notary_temp_dir, "notary-signer.crt"),
+					notary_config_dir)
+				shutil.copy2(
+					os.path.join(notary_temp_dir, "notary-signer.key"),
+					notary_config_dir)
+				shutil.copy2(
+					os.path.join(notary_temp_dir, "notary-signer-ca.crt"),
+					notary_config_dir)
+			shutil.copy2(
+				os.path.join(registry_config_dir, "root.crt"), notary_config_dir)
 			print("Copying notary signer configuration file")
-			shutil.copy2(os.path.join(notary_temp_dir, "signer-config.json"), notary_config_dir)
-			render(os.path.join(notary_temp_dir, "server-config.json"),
+			shutil.copy2(
+				os.path.join(notary_temp_dir, "signer-config.json"), notary_config_dir)
+			render(
+				os.path.join(notary_temp_dir, "server-config.json"),
 				os.path.join(notary_config_dir, "server-config.json"),
 				token_endpoint=public_url)
 
 			print("Copying nginx configuration file for notary")
-			shutil.copy2(os.path.join(templates_dir, "nginx", "notary.upstream.conf"), nginx_conf_d)
-			render(os.path.join(templates_dir, "nginx", "notary.server.conf"), 
-					os.path.join(nginx_conf_d, "notary.server.conf"), 
-					ssl_cert = os.path.join("/etc/nginx/cert", os.path.basename(target_cert_path)),
-					ssl_cert_key = os.path.join("/etc/nginx/cert", os.path.basename(target_cert_key_path)))
+			shutil.copy2(
+				os.path.join(templates_dir, "nginx", "notary.upstream.conf"),
+				nginx_conf_d)
+			render(
+				os.path.join(templates_dir, "nginx", "notary.server.conf"),
+				os.path.join(nginx_conf_d, "notary.server.conf"),
+				ssl_cert=os.path.join("/etc/nginx/cert",
+									  os.path.basename(target_cert_path)),
+				ssl_cert_key=os.path.join("/etc/nginx/cert",
+										  os.path.basename(target_cert_key_path)))
 
 			default_alias = get_alias(secretkey_path)
-			render(os.path.join(notary_temp_dir, "signer_env"), os.path.join(notary_config_dir, "signer_env"), alias = default_alias)
+			render(
+				os.path.join(notary_temp_dir, "signer_env"),
+				os.path.join(notary_config_dir, "signer_env"),
+				alias=default_alias)
 
 		if args.clair_mode:
 			clair_temp_dir = os.path.join(templates_dir, "clair")
@@ -754,33 +877,44 @@ var (
 			if os.path.exists(os.path.join(clair_config_dir, "postgresql-init.d")):
 				print("Copying offline data file for clair DB")
 				shutil.rmtree(os.path.join(clair_config_dir, "postgresql-init.d"))
-			shutil.copytree(os.path.join(clair_temp_dir, "postgresql-init.d"), os.path.join(clair_config_dir, "postgresql-init.d"))
-			postgres_env = os.path.join(clair_config_dir, "postgres_env") 
-			render(os.path.join(clair_temp_dir, "postgres_env"), postgres_env, password = clair_db_password)
+			shutil.copytree(
+				os.path.join(clair_temp_dir, "postgresql-init.d"),
+				os.path.join(clair_config_dir, "postgresql-init.d"))
+			postgres_env = os.path.join(clair_config_dir, "postgres_env")
+			render(
+				os.path.join(clair_temp_dir, "postgres_env"),
+				postgres_env,
+				password=clair_db_password)
 			clair_conf = os.path.join(clair_config_dir, "config.yaml")
-			render(os.path.join(clair_temp_dir, "config.yaml"),
-					clair_conf,
-					password = clair_db_password,
-					username = clair_db_username,
-					host = clair_db_host,
-					port = clair_db_port,
-					dbname = clair_db)
+			render(
+				os.path.join(clair_temp_dir, "config.yaml"),
+				clair_conf,
+				password=clair_db_password,
+				username=clair_db_username,
+				host=clair_db_host,
+				port=clair_db_port,
+				dbname=clair_db)
 
-		# config http proxy for Clair
+			# config http proxy for Clair
 			http_proxy = rcp.get("configuration", "http_proxy").strip()
 			https_proxy = rcp.get("configuration", "https_proxy").strip()
 			no_proxy = rcp.get("configuration", "no_proxy").strip()
 			clair_env = os.path.join(clair_config_dir, "clair_env")
-			render(os.path.join(clair_temp_dir, "clair_env"), clair_env,
-				http_proxy = http_proxy,
-				https_proxy = https_proxy,
-				no_proxy = no_proxy)
+			render(
+				os.path.join(clair_temp_dir, "clair_env"),
+				clair_env,
+				http_proxy=http_proxy,
+				https_proxy=https_proxy,
+				no_proxy=no_proxy)
 
 		if args.ha_mode:
 			prepare_ha(rcp, args)
 
 		FNULL.close()
-		print("The configuration files are ready, please use docker-compose to start the service.")
+		print(
+			"The configuration files are ready, please use docker-compose to start the service."
+		)
+
 	`)))
 
 	HarborDockerComposeTempl = template.Must(template.New("harbor").Parse(dedent.Dedent(`
@@ -788,7 +922,7 @@ var (
 		services:
 			log:
 				image: vmware/harbor-log:v1.5.0
-				container_name: harbor-log 
+				container_name: harbor-log
 				restart: always
 				volumes:
 				- /var/log/harbor/:/var/log/docker/:z
@@ -814,7 +948,7 @@ var (
 				- log
 				logging:
 				driver: "syslog"
-				options:  
+				options:
 					syslog-address: "tcp://127.0.0.1:1514"
 					tag: "registry"
 			mysql:
@@ -831,7 +965,7 @@ var (
 				- log
 				logging:
 				driver: "syslog"
-				options:  
+				options:
 					syslog-address: "tcp://127.0.0.1:1514"
 					tag: "mysql"
 			adminserver:
@@ -850,7 +984,7 @@ var (
 				- log
 				logging:
 				driver: "syslog"
-				options:  
+				options:
 					syslog-address: "tcp://127.0.0.1:1514"
 					tag: "adminserver"
 			ui:
@@ -874,7 +1008,7 @@ var (
 				- registry
 				logging:
 				driver: "syslog"
-				options:  
+				options:
 					syslog-address: "tcp://127.0.0.1:1514"
 					tag: "ui"
 			jobservice:
@@ -894,7 +1028,7 @@ var (
 				- adminserver
 				logging:
 				driver: "syslog"
-				options:  
+				options:
 					syslog-address: "tcp://127.0.0.1:1514"
 					tag: "jobservice"
 			redis:
@@ -909,7 +1043,7 @@ var (
 				- log
 				logging:
 				driver: "syslog"
-				options:  
+				options:
 					syslog-address: "tcp://127.0.0.1:1514"
 					tag: "redis"
 			proxy:
@@ -931,7 +1065,7 @@ var (
 				- log
 				logging:
 				driver: "syslog"
-				options:  
+				options:
 					syslog-address: "tcp://127.0.0.1:1514"
 					tag: "proxy"
 		networks:
@@ -939,7 +1073,7 @@ var (
 				external: false
 	`)))
 
-	HarborAdminServerEnvTempl = template.Must(template.New("harbor").Parse(dedent.Dedent(`	
+	HarborAdminServerEnvTempl = template.Must(template.New("harbor").Parse(dedent.Dedent(`
 		PORT=8080
 		LOG_LEVEL=info
 		EXT_ENDPOINT=$public_url
@@ -1081,7 +1215,7 @@ var (
 		upstream ui {
 			server ui:8080;
 		}
-		
+
 		log_format timed_combined '$$remote_addr - '
 			'"$$request" $$status $$body_bytes_sent '
 			'"$$http_referer" "$$http_user_agent" '
@@ -1098,16 +1232,16 @@ var (
 			# SSL
 			ssl_certificate $ssl_cert;
 			ssl_certificate_key $ssl_cert_key;
-		
+
 			# Recommendations from https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
 			ssl_protocols TLSv1.1 TLSv1.2;
 			ssl_ciphers '!aNULL:kECDH+AESGCM:ECDH+AESGCM:RSA+AESGCM:kECDH+AES:ECDH+AES:RSA+AES:';
 			ssl_prefer_server_ciphers on;
 			ssl_session_cache shared:SSL:10m;
-		
+
 			# disable any limits to avoid HTTP 413 for large image uploads
 			client_max_body_size 0;
-		
+
 			# required to avoid HTTP 411: see Issue #1486 (https://github.com/docker/docker/issues/1486)
 			chunked_transfer_encoding on;
 
@@ -1116,7 +1250,7 @@ var (
 			proxy_set_header Host $$http_host;
 			proxy_set_header X-Real-IP $$remote_addr;
 			proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
-			
+
 			# When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.
 			proxy_set_header X-Forwarded-Proto $$scheme;
 
@@ -1136,7 +1270,7 @@ var (
 			proxy_set_header Host $$http_host;
 			proxy_set_header X-Real-IP $$remote_addr;
 			proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
-			
+
 			# When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.
 			proxy_set_header X-Forwarded-Proto $$scheme;
 			proxy_buffering off;
@@ -1148,14 +1282,14 @@ var (
 			proxy_set_header Host $$http_host;
 			proxy_set_header X-Real-IP $$remote_addr;
 			proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
-			
+
 			# When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.
 			proxy_set_header X-Forwarded-Proto $$scheme;
 
 			proxy_buffering off;
 			proxy_request_buffering off;
 			}
-			
+
 			location /service/notifications {
 			return 404;
 			}
@@ -1164,7 +1298,7 @@ var (
 			listen 80;
 			#server_name harbordomain.com;
 			return 301 https://$$host$$request_uri;
-		} 
+		}
 		}
 
 	`)))
@@ -1209,10 +1343,10 @@ var (
 		appname = Harbor
 		runmode = dev
 		enablegzip = true
-		
+
 		[dev]
 		httpport = 8080
-		
+
 	`)))
 
 	HarborUIEnvTempl = template.Must(template.New("harbor").Parse(dedent.Dedent(`
