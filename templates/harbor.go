@@ -1307,48 +1307,49 @@ var (
 	`)))
 
 	HarborRegistryConfigTempl = template.Must(template.New("harbor").Parse(dedent.Dedent(`
-		version: 0.1
-		log:
-		level: info
-		fields:
-			service: registry
-		storage:
-		cache:
-			layerinfo: inmemory
-		$storage_provider_info
-		maintenance:
-			uploadpurging:
-			enabled: false
-		delete:
-			enabled: true
-		http:
-		addr: :5000
-		secret: placeholder
-		debug:
-			addr: localhost:5001
-		auth:
-		token:
-			issuer: harbor-token-issuer
-			realm: $public_url/service/token
-			rootcertbundle: /etc/registry/root.crt
-			service: harbor-registry
-		notifications:
-		endpoints:
-		- name: harbor
-			disabled: false
-			url: $ui_url/service/notifications
-			timeout: 3000ms
-			threshold: 5
-			backoff: 1s
-	`)))
+        version: 0.1
+        log:
+          level: info
+          fields:
+            service: registry
+        storage:
+          cache:
+            layerinfo: inmemory
+          $storage_provider_info
+          maintenance:
+            uploadpurging:
+              enabled: false
+          delete:
+            enabled: true
+        http:
+          addr: :5000
+          secret: placeholder
+          debug:
+            addr: localhost:5001
+        auth:
+          token:
+            issuer: harbor-token-issuer
+            realm: $public_url/service/token
+            rootcertbundle: /etc/registry/root.crt
+            service: harbor-registry
+        notifications:
+          endpoints:
+          - name: harbor
+            disabled: false
+            url: $ui_url/service/notifications
+            timeout: 3000ms
+            threshold: 5
+            backoff: 1s
 
-	HarborUIAppTempl = template.Must(template.New("harbor").Parse(dedent.Dedent(`
-		appname = Harbor
-		runmode = dev
-		enablegzip = true
+        `)))
 
-		[dev]
-		httpport = 8080
+        HarborUIAppTempl = template.Must(template.New("harbor").Parse(dedent.Dedent(`
+            appname = Harbor
+            runmode = dev
+            enablegzip = true
+
+            [dev]
+            httpport = 8080
 
 	`)))
 
