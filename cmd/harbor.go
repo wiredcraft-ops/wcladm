@@ -28,7 +28,7 @@ var (
 	}
 
 	harborTemplates = []harborTemplate{
-		{"/tmp/wcladm-harbor/common/templates/nginx/nginx.conf", templates.HarborNginxConfigTempl, nil},
+		{"/tmp/wcladm-harbor/common/templates/nginx/nginx.https.conf", templates.HarborNginxConfigTempl, nil},
 		{"/tmp/wcladm-harbor/harbor.cfg", templates.HarborConfigTempl, harborConfig},
 		{"/tmp/wcladm-harbor/prepare", templates.HarborPrepareTempl, nil},
 		{"/tmp/wcladm-harbor/docker-compose.yml", templates.HarborDockerComposeTempl, nil},
