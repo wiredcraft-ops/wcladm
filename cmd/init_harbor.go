@@ -37,8 +37,8 @@ var (
 	}
 )
 
-// harborCmd represents the harbor command
-var harborCmd = &cobra.Command{
+// initHarborCmd represents the harbor command
+var initHarborCmd = &cobra.Command{
 	Use:   "harbor",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
@@ -88,8 +88,8 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	initCmd.AddCommand(harborCmd)
-	harborCmd.Flags().StringVarP(&dest, "dest", "d", "~/.wcladm/harbor", "harbor dest")
+	initCmd.AddCommand(initHarborCmd)
+	initHarborCmd.Flags().StringVarP(&dest, "dest", "d", "~/.wcladm/harbor", "harbor dest")
 }
 
 func writeTemplateFile(ts []harborTemplate) {
