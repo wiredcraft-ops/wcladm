@@ -3,6 +3,7 @@ package cmd
 import (
 	"log"
 	"os"
+	"path/filepath"
 	"text/template"
 
 	"github.com/spf13/cobra"
@@ -59,6 +60,11 @@ func init() {
 
 func writeTemplateFile(ts []harborTemplate) {
 	for _, t := range ts {
+		dir, _ := filepath.Split(t.Path)
+		if err := mkdir(dir); err != nil {
+			return
+		}
+
 		f, err := os.Create(t.Path)
 		if err != nil {
 			log.Println("create file: ", err)
@@ -72,4 +78,14 @@ func writeTemplateFile(ts []harborTemplate) {
 		}
 		f.Close()
 	}
+}
+
+func mkdir(dir string) error {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err := os.MkdirAll(dir, 0755)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
