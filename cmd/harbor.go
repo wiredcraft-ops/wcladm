@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"bytes"
+	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"text/template"
 
@@ -54,7 +57,33 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("Rendering harbor templates...")
 		writeTemplateFile(harborTemplates)
+
+		fmt.Println("Generating the configuration...")
+
+		var pstdout, pstderr bytes.Buffer
+		prepare := exec.Command("python", "/tmp/wcladm-harbor/prepare")
+		prepare.Stdout = &pstdout
+		prepare.Stderr = &pstderr
+		if err := prepare.Run(); err != nil {
+			fmt.Println(pstdout.String())
+			fmt.Println(pstderr.String())
+			fmt.Println("Generated the configuration failed")
+			os.Exit(1)
+		}
+
+		fmt.Println("Starting harbor...")
+		var cstdout, cstderr bytes.Buffer
+		compose := exec.Command("docker-compose", "-f", "/tmp/wcladm-harbor/docker-compose.yml", "up", "-d")
+		compose.Stdout = &cstdout
+		compose.Stderr = &cstderr
+		if err := compose.Run(); err != nil {
+			fmt.Println(cstdout.String())
+			fmt.Println(cstderr.String())
+			fmt.Println("Start harbor failed")
+			os.Exit(1)
+		}
 	},
 }
 
