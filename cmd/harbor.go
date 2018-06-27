@@ -28,7 +28,18 @@ var (
 	}
 
 	harborTemplates = []harborTemplate{
-		{"common/templates/nginx/nginx.conf", templates.HarborNginxConfigTempl, nil},
+		{"/tmp/wcladm-harbor/common/templates/nginx/nginx.conf", templates.HarborNginxConfigTempl, nil},
+		{"/tmp/wcladm-harbor/harbor.cfg", templates.HarborConfigTempl, harborConfig},
+		{"/tmp/wcladm-harbor/prepare", templates.HarborPrepareTempl, nil},
+		{"/tmp/wcladm-harbor/docker-compose.yml", templates.HarborDockerComposeTempl, nil},
+		{"/tmp/wcladm-harbor/common/templates/adminserver/env", templates.HarborAdminServerEnvTempl, nil},
+		{"/tmp/wcladm-harbor/common/templates/db/env", templates.HarborDBEnvTempl, nil},
+		{"/tmp/wcladm-harbor/common/templates/jobservice/config.yml", templates.HarborJobServerConfigTempl, nil},
+		{"/tmp/wcladm-harbor/common/templates/jobservice/env", templates.HarborJobServerEnvTempl, nil},
+		{"/tmp/wcladm-harbor/common/templates/log/logrotate.conf", templates.HarborLogrotateConfigTempl, nil},
+		{"/tmp/wcladm-harbor/common/templates/registry/config.yml", templates.HarborRegistryConfigTempl, nil},
+		{"/tmp/wcladm-harbor/common/templates/ui/app.conf", templates.HarborUIAppTempl, nil},
+		{"/tmp/wcladm-harbor/common/templates/ui/env", templates.HarborUIEnvTempl, nil},
 	}
 )
 
@@ -43,14 +54,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		/* err := harborConfigTempl.Execute(os.Stdout, harborConfig)
-		if err != nil {
-			log.Println("executing template:", err)
-		} */
-		err := templates.HarborPrepareTempl.Execute(os.Stdout, nil)
-		if err != nil {
-			log.Println("executing template:", err)
-		}
+		writeTemplateFile(harborTemplates)
 	},
 }
 
