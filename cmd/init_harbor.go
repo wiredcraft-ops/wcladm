@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"log"
@@ -43,6 +44,28 @@ var initHarborCmd = &cobra.Command{
 		if err != nil {
 			fmt.Println("Cannot get your harbor dest dir")
 			os.Exit(1)
+		}
+
+		if scheme == "https" {
+			if sslCert == "" {
+				reader := bufio.NewReader(os.Stdin)
+				fmt.Print("SSL Cert file (.crt): ")
+				if sslCert, err = reader.ReadString('\n'); err != nil {
+					fmt.Println(err)
+					return
+				}
+			}
+
+			if sslCertKey == "" {
+				reader := bufio.NewReader(os.Stdin)
+				fmt.Print("SSL CertKey file (.key): ")
+				if sslCertKey, err = reader.ReadString('\n'); err != nil {
+					fmt.Println(err)
+					return
+				}
+			}
+
+			//TODO: Make sure sslCert and sslCertKey file exist
 		}
 
 		harborConfig := &types.HarborConfiguration{
@@ -107,7 +130,7 @@ func init() {
 	initCmd.AddCommand(initHarborCmd)
 	initHarborCmd.Flags().StringVarP(&dest, "dest", "d", "~/.wcladm/harbor", "harbor dest")
 	initHarborCmd.Flags().StringVar(&hostname, "hostname", "registry.wiredcraft.cn", "hostname for harbor")
-	initHarborCmd.Flags().StringVar(&scheme, "scheme", "http", "scheme for harbor, 'https' or 'http'")
+	initHarborCmd.Flags().StringVar(&scheme, "scheme", "https", "scheme for harbor, 'https' or 'http'")
 	initHarborCmd.Flags().StringVar(&sslCert, "ssl-cert", "", "ssl cert file path, required when 'scheme' is 'https'")
 	initHarborCmd.Flags().StringVar(&sslCertKey, "ssl-key", "", "ssl cert key file path, required when 'scheme' is 'https'")
 	initHarborCmd.Flags().StringVar(&adminPassword, "admin-pass", "12345", "harbor admin password")
