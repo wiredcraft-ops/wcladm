@@ -23,18 +23,13 @@ type harborTemplate struct {
 }
 
 var (
-	dest string
-)
-
-var (
-	harborConfig = &types.HarborConfiguration{
-		HostName:      "registry.wiredcraft.cn",
-		Scheme:        "https",
-		SSLCert:       "/tmp/certs/*.wiredcraft.cn.crt",
-		SSLCertKey:    "/tmp/certs/*.wiredcraft.cn.key",
-		AdminPassword: "12345",
-		DBPassword:    "12345",
-	}
+	dest          string
+	hostname      string
+	scheme        string
+	sslCert       string
+	sslCertKey    string
+	adminPassword string
+	dbPassword    string
 )
 
 // initHarborCmd represents the harbor command
@@ -50,7 +45,33 @@ var initHarborCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		harborTemplates := getTemplates(dir)
+		harborConfig := &types.HarborConfiguration{
+			HostName:      hostname,
+			Scheme:        scheme,
+			SSLCert:       sslCert,
+			SSLCertKey:    sslCertKey,
+			AdminPassword: adminPassword,
+			DBPassword:    dbPassword,
+		}
+
+		harborTemplates := []harborTemplate{
+			{"harbor.cfg", templates.HarborConfigTempl, harborConfig},
+			{"prepare", templates.HarborPrepareTempl, nil},
+			{"docker-compose.yml", templates.HarborDockerComposeTempl, nil},
+			{"common/templates/adminserver/env", templates.HarborAdminServerEnvTempl, nil},
+			{"common/templates/db/env", templates.HarborDBEnvTempl, nil},
+			{"common/templates/nginx/nginx.https.conf", templates.HarborNginxHTTPSConfigTempl, nil},
+			{"common/templates/nginx/nginx.http.conf", templates.HarborNginxHTTPConfigTempl, nil},
+			{"common/templates/jobservice/config.yml", templates.HarborJobServerConfigTempl, nil},
+			{"common/templates/jobservice/env", templates.HarborJobServerEnvTempl, nil},
+			{"common/templates/log/logrotate.conf", templates.HarborLogrotateConfigTempl, nil},
+			{"common/templates/registry/config.yml", templates.HarborRegistryConfigTempl, nil},
+			{"common/templates/ui/app.conf", templates.HarborUIAppTempl, nil},
+			{"common/templates/ui/env", templates.HarborUIEnvTempl, nil},
+		}
+		for i := range harborTemplates {
+			harborTemplates[i].Path = path.Join(dir, harborTemplates[i].Path)
+		}
 
 		fmt.Println("Rendering harbor templates...")
 		writeTemplateFile(harborTemplates)
@@ -85,6 +106,12 @@ var initHarborCmd = &cobra.Command{
 func init() {
 	initCmd.AddCommand(initHarborCmd)
 	initHarborCmd.Flags().StringVarP(&dest, "dest", "d", "~/.wcladm/harbor", "harbor dest")
+	initHarborCmd.Flags().StringVar(&hostname, "hostname", "registry.wiredcraft.cn", "hostname for harbor")
+	initHarborCmd.Flags().StringVar(&scheme, "scheme", "http", "scheme for harbor, 'https' or 'http'")
+	initHarborCmd.Flags().StringVar(&sslCert, "ssl-cert", "", "ssl cert file path, required when 'scheme' is 'https'")
+	initHarborCmd.Flags().StringVar(&sslCertKey, "ssl-key", "", "ssl cert key file path, required when 'scheme' is 'https'")
+	initHarborCmd.Flags().StringVar(&adminPassword, "admin-pass", "12345", "harbor admin password")
+	initHarborCmd.Flags().StringVar(&dbPassword, "db-pass", "12345", "harbor db password")
 }
 
 func writeTemplateFile(ts []harborTemplate) {
@@ -117,26 +144,4 @@ func mkdir(dir string) error {
 		}
 	}
 	return nil
-}
-
-func getTemplates(dir string) []harborTemplate {
-
-	h := []harborTemplate{
-		{"harbor.cfg", templates.HarborConfigTempl, harborConfig},
-		{"prepare", templates.HarborPrepareTempl, nil},
-		{"docker-compose.yml", templates.HarborDockerComposeTempl, nil},
-		{"common/templates/adminserver/env", templates.HarborAdminServerEnvTempl, nil},
-		{"common/templates/db/env", templates.HarborDBEnvTempl, nil},
-		{"common/templates/nginx/nginx.https.conf", templates.HarborNginxConfigTempl, nil},
-		{"common/templates/jobservice/config.yml", templates.HarborJobServerConfigTempl, nil},
-		{"common/templates/jobservice/env", templates.HarborJobServerEnvTempl, nil},
-		{"common/templates/log/logrotate.conf", templates.HarborLogrotateConfigTempl, nil},
-		{"common/templates/registry/config.yml", templates.HarborRegistryConfigTempl, nil},
-		{"common/templates/ui/app.conf", templates.HarborUIAppTempl, nil},
-		{"common/templates/ui/env", templates.HarborUIEnvTempl, nil},
-	}
-	for i := range h {
-		h[i].Path = path.Join(dir, h[i].Path)
-	}
-	return h
 }
