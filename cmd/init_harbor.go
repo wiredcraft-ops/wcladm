@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/howeyc/gopass"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/wiredcraft-ops/wcladm/templates"
@@ -31,6 +32,7 @@ var (
 	sslCertKey    string
 	adminPassword string
 	dbPassword    string
+	dev           bool
 )
 
 // initHarborCmd represents the harbor command
@@ -44,6 +46,12 @@ var initHarborCmd = &cobra.Command{
 		if err != nil {
 			fmt.Println("Cannot get your harbor dest dir")
 			os.Exit(1)
+		}
+
+		if dev {
+			scheme = "http"
+			adminPassword = "12345"
+			dbPassword = "12345"
 		}
 
 		if scheme == "https" {
@@ -66,6 +74,26 @@ var initHarborCmd = &cobra.Command{
 			}
 
 			//TODO: Make sure sslCert and sslCertKey file exist
+		}
+
+		if adminPassword == "" {
+			fmt.Printf("Admin Password: ")
+			pass, err := gopass.GetPasswdMasked()
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			adminPassword = string(pass)
+		}
+
+		if dbPassword == "" {
+			fmt.Printf("DB Password: ")
+			pass, err := gopass.GetPasswdMasked()
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			dbPassword = string(pass)
 		}
 
 		harborConfig := &types.HarborConfiguration{
@@ -133,8 +161,9 @@ func init() {
 	initHarborCmd.Flags().StringVar(&scheme, "scheme", "https", "scheme for harbor, 'https' or 'http'")
 	initHarborCmd.Flags().StringVar(&sslCert, "ssl-cert", "", "ssl cert file path, required when 'scheme' is 'https'")
 	initHarborCmd.Flags().StringVar(&sslCertKey, "ssl-key", "", "ssl cert key file path, required when 'scheme' is 'https'")
-	initHarborCmd.Flags().StringVar(&adminPassword, "admin-pass", "12345", "harbor admin password")
-	initHarborCmd.Flags().StringVar(&dbPassword, "db-pass", "12345", "harbor db password")
+	initHarborCmd.Flags().StringVar(&adminPassword, "admin-pass", "", "harbor admin password")
+	initHarborCmd.Flags().StringVar(&dbPassword, "db-pass", "", "harbor db password")
+	initHarborCmd.Flags().BoolVar(&dev, "dev", false, "init an harbor for dev mode(simple pass & http)")
 }
 
 func writeTemplateFile(ts []harborTemplate) {
