@@ -151,6 +151,11 @@ var initHarborCmd = &cobra.Command{
 			fmt.Println("Start harbor failed")
 			os.Exit(1)
 		}
+
+		fmt.Println("\n\n\nStarted:")
+		fmt.Printf("%s://%s\n", scheme, hostname)
+		fmt.Printf("Admin password: %s\n", adminPassword)
+		fmt.Printf("DB password: %s\n", dbPassword)
 	},
 }
 
