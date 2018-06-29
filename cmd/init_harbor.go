@@ -30,8 +30,8 @@ var (
 	harborConfig = &types.HarborConfiguration{
 		HostName:      "registry.wiredcraft.cn",
 		Scheme:        "https",
-		SSLCert:       "/tmp/certs",
-		SSLCertKey:    "/tmp/certs",
+		SSLCert:       "/tmp/certs/*.wiredcraft.cn.crt",
+		SSLCertKey:    "/tmp/certs/*.wiredcraft.cn.key",
 		AdminPassword: "12345",
 		DBPassword:    "12345",
 	}
@@ -40,13 +40,8 @@ var (
 // initHarborCmd represents the harbor command
 var initHarborCmd = &cobra.Command{
 	Use:   "harbor",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Init an Harbor",
+	Long:  `Generate configuration files for habror and start it by docker`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		dir, err := homedir.Expand(dest)
