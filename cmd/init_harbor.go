@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path"
@@ -23,6 +24,8 @@ type harborTemplate struct {
 	Template *template.Template
 	Data     interface{}
 }
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 var (
 	dest          string
@@ -84,6 +87,9 @@ var initHarborCmd = &cobra.Command{
 				return
 			}
 			adminPassword = string(pass)
+			if adminPassword == "" {
+				adminPassword = randStringBytes(10)
+			}
 		}
 
 		if dbPassword == "" {
@@ -94,6 +100,9 @@ var initHarborCmd = &cobra.Command{
 				return
 			}
 			dbPassword = string(pass)
+			if dbPassword == "" {
+				dbPassword = randStringBytes(10)
+			}
 		}
 
 		harborConfig := &types.HarborConfiguration{
@@ -201,4 +210,12 @@ func mkdir(dir string) error {
 		}
 	}
 	return nil
+}
+
+func randStringBytes(n int) string {
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
 }
