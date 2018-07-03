@@ -921,7 +921,7 @@ var (
         version: '2'
         services:
           log:
-            image: vmware/harbor-log:v1.5.0
+            image: vmware/harbor-log:v1.5.1
             container_name: harbor-log
             restart: always
             volumes:
@@ -932,7 +932,7 @@ var (
             networks:
               - harbor
           registry:
-            image: vmware/registry-photon:v2.6.2-v1.5.0
+            image: vmware/registry-photon:v2.6.2-v1.5.1
             container_name: registry
             restart: always
             volumes:
@@ -952,7 +952,7 @@ var (
                 syslog-address: "tcp://127.0.0.1:1514"
                 tag: "registry"
           mysql:
-            image: vmware/harbor-db:v1.5.0
+            image: vmware/harbor-db:v1.5.1
             container_name: harbor-db
             restart: always
             volumes:
@@ -969,7 +969,7 @@ var (
                 syslog-address: "tcp://127.0.0.1:1514"
                 tag: "mysql"
           adminserver:
-            image: vmware/harbor-adminserver:v1.5.0
+            image: vmware/harbor-adminserver:v1.5.1
             container_name: harbor-adminserver
             env_file:
               - ./common/config/adminserver/env
@@ -988,7 +988,7 @@ var (
                 syslog-address: "tcp://127.0.0.1:1514"
                 tag: "adminserver"
           ui:
-            image: vmware/harbor-ui:v1.5.0
+            image: vmware/harbor-ui:v1.5.1
             container_name: harbor-ui
             env_file:
               - ./common/config/ui/env
@@ -1012,7 +1012,7 @@ var (
                 syslog-address: "tcp://127.0.0.1:1514"
                 tag: "ui"
           jobservice:
-            image: vmware/harbor-jobservice:v1.5.0
+            image: vmware/harbor-jobservice:v1.5.1
             container_name: harbor-jobservice
             env_file:
               - ./common/config/jobservice/env
@@ -1032,7 +1032,7 @@ var (
                 syslog-address: "tcp://127.0.0.1:1514"
                 tag: "jobservice"
           redis:
-            image: vmware/redis-photon:v1.5.0
+            image: vmware/redis-photon:v1.5.1
             container_name: redis
             restart: always
             volumes:
@@ -1047,7 +1047,7 @@ var (
                 syslog-address: "tcp://127.0.0.1:1514"
                 tag: "redis"
           proxy:
-            image: vmware/nginx-photon:v1.5.0
+            image: vmware/nginx-photon:v1.5.1
             container_name: nginx
             restart: always
             volumes:
