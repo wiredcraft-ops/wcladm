@@ -47,6 +47,30 @@ var initPipelinesCmd = &cobra.Command{
 				fmt.Println("Start Pipelines failed")
 				os.Exit(1)
 			}
+			return
+		}
+
+		if pipelinesGHOAuthSecret != "" && pipelinesGHOAuthKey != "" && pipelinesGHOAuthTeam != "" {
+			var stdout, stderr bytes.Buffer
+			command := fmt.Sprintf(`docker run -d \
+										--name wcladmin-pipelines \
+										-p 8888 -e GH_OAUTH_KEY=%s \
+										-e GH_OAUTH_SECRET=%s \
+										boratbot/pipelines \
+										pipelines server \
+											--github-auth=%s \
+											--host 0.0.0.0`,
+				pipelinesGHOAuthKey, pipelinesGHOAuthSecret, pipelinesGHOAuthTeam)
+			prepare := exec.Command("sh", "-c", command)
+			prepare.Stdout = &stdout
+			prepare.Stderr = &stderr
+			if err := prepare.Run(); err != nil {
+				fmt.Println(stdout.String())
+				fmt.Println(stderr.String())
+				fmt.Println(err)
+				fmt.Println("Start Pipelines failed")
+				os.Exit(1)
+			}
 		}
 	},
 }
