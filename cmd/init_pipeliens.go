@@ -33,7 +33,7 @@ var initPipelinesCmd = &cobra.Command{
 			var stdout, stderr bytes.Buffer
 			command := fmt.Sprintf(`docker run -d \
 										--name wcladmin-pipelines \
-										-p 8888 \
+										-p 8888:8888 \
 										-e ADMIN_USER=%s \
 										-e ADMIN_PASS=%s \
 										-v /opt/pipelines:/workspace \
