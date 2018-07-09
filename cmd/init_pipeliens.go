@@ -81,7 +81,7 @@ func init() {
 	initPipelinesCmd.Flags().StringVar(&pipelinesGHOAuthKey, "gh-oauth-key", "", "Github OAuth key")
 	initPipelinesCmd.Flags().StringVar(&pipelinesGHOAuthSecret, "gh-oauth-secret", "", "Github OAuth Secret")
 	initPipelinesCmd.Flags().StringVar(&pipelinesGHOAuthTeam, "gh-oauth-team", "Wiredcraft/core-members,Wiredcraft/leaders", "Github OAuth Team")
-	initPipelinesCmd.Flags().StringVar(&pipelinesUsername, "username", "", "amdin username")
+	initPipelinesCmd.Flags().StringVar(&pipelinesUsername, "username", "admin", "amdin username")
 	initPipelinesCmd.Flags().StringVar(&pipelinesPassword, "password", "", "admin password")
-	initPipelinesCmd.Flags().BoolVar(&pipelinesDev, "dev", true, "init pipelines for dev mode(simple pass)")
+	initPipelinesCmd.Flags().BoolVar(&pipelinesDev, "dev", false, "init pipelines for dev mode(simple pass)")
 }
