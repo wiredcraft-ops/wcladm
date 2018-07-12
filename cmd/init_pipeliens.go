@@ -37,6 +37,7 @@ var initPipelinesCmd = &cobra.Command{
 										-e ADMIN_USER=%s \
 										-e ADMIN_PASS=%s \
 										-v /data/pipelines:/workspace \
+										-v /data:/data \
 										boratbot/pipelines`, pipelinesUsername, pipelinesPassword)
 			prepare := exec.Command("sh", "-c", command)
 			prepare.Stdout = &stdout
